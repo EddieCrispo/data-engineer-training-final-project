@@ -1,16 +1,25 @@
 # ================================ AIRFLOW ================================
-x-airflow-common:
-  &airflow-common
+x-airflow-common: &airflow-common
   build: ./airflow/.
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/data:/opt/airflow/data
     - ./airflow/plugins:/opt/airflow/plugins
+    - ./dataset_generator:/opt/airflow/dataset_generator
   user: "${AIRFLOW_UID:-50000}:0"
   env_file:
     - ./airflow/.env
-  depends_on:
-    &airflow-common-depends-on
+  environment:
+    # Warehouse (bronze/silver/gold) Postgres - the `postgres` service below,
+    # NOT airflow-postgres (that one is Airflow's own metadata DB). Requires
+    # `docker compose --profile airflow --profile postgres up -d`.
+    # Values must match db/.env (POSTGRES_DB/POSTGRES_USER/POSTGRES_PASSWORD).
+    WAREHOUSE_HOST: postgres
+    WAREHOUSE_PORT: 5432
+    WAREHOUSE_DB: warehouse
+    WAREHOUSE_USER: root
+    WAREHOUSE_PASSWORD: dibimbing
+  depends_on: &airflow-common-depends-on
     airflow-postgres:
       condition: service_healthy
 
@@ -61,7 +70,9 @@ services:
     <<: *airflow-common
     container_name: airflow-init
     entrypoint: /bin/bash
-    command: version
+    command:
+      - -c
+      - exec /entrypoint airflow version
     profiles:
       - airflow
 
@@ -75,7 +86,7 @@ services:
     profiles:
       - airflow
 
-# ================================ GRAFANA ================================
+  # ================================ GRAFANA ================================
   prometheus:
     image: prom/prometheus:latest
     container_name: grafana-prometheus
@@ -101,7 +112,7 @@ services:
     profiles:
       - grafana
 
-# ================================ DB ================================
+  # ================================ DB ================================
   mysql:
     image: quay.io/debezium/example-mysql:2.6
     container_name: mysql
@@ -188,7 +199,7 @@ services:
     profiles:
       - hive
 
-# ================================ SPARK ================================
+  # ================================ SPARK ================================
   spark-master:
     build: ./spark/.
     container_name: spark-master
@@ -240,7 +251,7 @@ services:
     profiles:
       - spark
 
-# ======================= KAFKA =======================
+  # ======================= KAFKA =======================
   zookeeper:
     image: bitnamilegacy/zookeeper:3.7.0
     hostname: zookeeper

@@ -20,4 +20,10 @@ RUN pip install --no-cache-dir \
     "pyspark==3.5.4" \
     "apache-airflow[statsd]==2.10.5" \
     "apache-airflow-providers-apache-hive==9.0.0" \
-    "apache-airflow-providers-apache-spark==5.0.0"
+    "apache-airflow-providers-apache-spark==5.0.0" \
+    "apache-airflow-providers-postgres==5.13.1" \
+    "pandas==2.1.4" \
+    "psycopg2-binary==2.9.10" \
+    "SQLAlchemy==1.4.54" \
+    "matplotlib==3.9.2" \
+    "Faker==33.1.0"
