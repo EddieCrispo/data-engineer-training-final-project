@@ -1,0 +1,3 @@
+review_id,customer_id,product_id,rating,review_text,review_date
+REV000001,C00002,P0002,2,Unde eaque fugit laboriosam similique nesciunt corrupti nam.,2026-07-08
+REV000002,C00008,P0023,1,Neque fugiat earum quasi odit occaecati eos rem sed nam tempora qui aliquam.,2026-07-08
